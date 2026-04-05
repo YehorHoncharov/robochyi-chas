@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Облік Часу</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0f0e; --surface:#151917; --surface2:#1c201e;
+    --border:#2a2e2c; --accent:#c8f560; --accent2:#5fc897;
+    --red:#f56060; --text:#e8ede9; --muted:#6b726d; --gold:#f5c842;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 50% -20%,rgba(200,245,96,.06),transparent),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(95,200,151,.04),transparent);pointer-events:none;z-index:0;}
+  .container{max-width:960px;margin:0 auto;padding:40px 20px 80px;position:relative;z-index:1;}
+  header{display:flex;align-items:baseline;gap:16px;margin-bottom:32px;padding-bottom:20px;border-bottom:1px solid var(--border);}
+  header h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,8vw,68px);letter-spacing:4px;color:var(--accent);line-height:1;}
+  .rate-badge{font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:4px 10px;border-radius:2px;}
+  .rate-badge span{color:var(--accent2);font-weight:600;}
+  .sync-status{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:2px;color:var(--muted);margin-left:auto;}
+  .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s;}
+  .sync-dot.ok{background:var(--accent);} .sync-dot.loading{background:var(--gold);animation:pulse 1s infinite;} .sync-dot.error{background:var(--red);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+  @media(max-width:600px){.stats-bar{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px 16px;text-align:center;}
+  .stat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;line-height:1;margin-bottom:3px;}
+  .stat-val.green{color:var(--accent);} .stat-val.teal{color:var(--accent2);} .stat-val.gold{color:var(--gold);} .stat-val.red{color:var(--red);}
+  .stat-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+  .balance-bar{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .balance-bar .b-label{font-size:12px;color:var(--muted);letter-spacing:1px;}
+  .balance-bar .b-val{font-family:'Bebas Neue';font-size:26px;letter-spacing:2px;}
+  .balance-bar .b-val.positive{color:var(--accent);} .balance-bar .b-val.zero{color:var(--muted);}
+  .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+  .tab-btn{background:none;border:none;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:10px 18px;cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;margin-bottom:-1px;}
+  .tab-btn:hover{color:var(--text);}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-pane{display:none;} .tab-pane.active{display:block;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:24px;margin-bottom:16px;}
+  .card-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
+  label{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+  input[type="date"],input[type="time"],input[type="number"],input[type="text"]{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:14px;padding:11px 14px;border-radius:3px;outline:none;transition:border-color .2s;color-scheme:dark;}
+  input:focus{border-color:var(--accent);}
+  .form-row{display:grid;grid-template-columns:140px 100px 100px 1fr;gap:12px;align-items:end;}
+  @media(max-width:640px){.form-row{grid-template-columns:1fr 1fr;}}
+  .field{margin-bottom:0;}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px 16px;border:none;border-radius:3px;cursor:pointer;transition:all .15s;width:100%;}
+  .btn-add{background:var(--accent);color:#0d0f0e;}
+  .btn-add:hover{background:#d8ff70;transform:translateY(-1px);}
+  .btn-pay{background:linear-gradient(135deg,var(--gold),#f59a42);color:#0d0f0e;font-size:13px;padding:15px;position:relative;overflow:hidden;}
+  .btn-pay:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 24px rgba(245,200,66,.25);}
+  .btn-pay::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .4s;}
+  .btn-pay:hover::before{transform:translateX(100%);}
+  .btn-clear{background:transparent;color:var(--red);border:1px solid rgba(245,96,96,.4);opacity:.8;}
+  .btn-clear:hover{opacity:1;background:rgba(245,96,96,.08);}
+  .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+  @media(max-width:560px){.btn-row{grid-template-columns:1fr;}}
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+  .table-head{background:var(--surface2);border-bottom:1px solid var(--border);padding:9px 18px;display:grid;}
+  .th{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+  .table-body{max-height:380px;overflow-y:auto;}
+  .table-body::-webkit-scrollbar{width:4px;}
+  .table-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+  .table-row{display:grid;padding:12px 18px;border-bottom:1px solid rgba(42,46,44,.5);align-items:center;transition:background .1s;animation:rowIn .25s ease;}
+  @keyframes rowIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+  .table-row:hover{background:var(--surface2);}
+  .table-row:last-child{border-bottom:none;}
+  .td{font-size:12px;}
+  .td.muted{color:var(--muted);font-size:11px;} .td.teal{color:var(--accent2);font-weight:600;} .td.green{color:var(--accent);font-weight:600;} .td.gold{color:var(--gold);font-weight:600;}
+  .sessions-head,.session-row{grid-template-columns:110px 75px 75px 80px 110px 32px;}
+  .payments-head,.payment-row{grid-template-columns:120px 75px 1fr 110px 32px;}
+  .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 5px;border-radius:2px;transition:color .15s,background .15s;}
+  .del-btn:hover{color:var(--red);background:rgba(245,96,96,.1);}
+  .empty{padding:36px;text-align:center;color:var(--muted);font-size:11px;letter-spacing:2px;}
+  .tag{display:inline-block;font-size:8px;letter-spacing:2px;padding:2px 6px;border-radius:2px;white-space:nowrap;}
+  .tag-gold{background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.3);}
+  .summary-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+  @media(max-width:500px){.summary-cards{grid-template-columns:1fr 1fr;}}
+  .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px 16px;}
+  .sum-val{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;line-height:1;margin-bottom:3px;}
+  .sum-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .modal-overlay.show{opacity:1;pointer-events:all;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:36px;max-width:440px;width:92%;transform:translateY(20px) scale(.97);transition:transform .25s;position:relative;}
+  .modal-overlay.show .modal{transform:translateY(0) scale(1);}
+  .modal-icon{font-size:44px;text-align:center;margin-bottom:12px;}
+  .modal h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;text-align:center;margin-bottom:6px;color:var(--gold);}
+  .modal-sub{text-align:center;font-size:11px;color:var(--muted);margin-bottom:22px;line-height:1.6;}
+  .modal-amount{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:16px;text-align:center;margin-bottom:22px;}
+  .modal-amount .amount-val{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--gold);letter-spacing:4px;line-height:1;}
+  .modal-amount .amount-label{font-size:9px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-top:4px;}
+  .modal .field{margin-bottom:14px;}
+  .btn-confirm{width:100%;background:var(--gold);color:#0d0f0e;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:14px;border:none;border-radius:3px;cursor:pointer;transition:all .15s;}
+  .btn-confirm:hover{filter:brightness(1.1);}
+  .btn-close-modal{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;transition:color .15s;}
+  .btn-close-modal:hover{color:var(--text);}
+  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:#0d0f0e;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;padding:11px 22px;border-radius:3px;z-index:200;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .section-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>РОБОЧИЙ ЧАС</h1>
+<<<<<<< HEAD
+    <div class="rate-badge">ставка <span>100 ₴/год</span></div>
+=======
+    <div class="rate-badge">ставка <span>150 ₴/год</span></div>
+>>>>>>> dd528da (150 h)
+    <div class="sync-status">
+      <div class="sync-dot loading" id="syncDot"></div>
+      <span id="syncLabel">З'єднання...</span>
+    </div>
+  </header>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val green" id="statHours">0</div><div class="stat-label">Годин всього</div></div>
+    <div class="stat"><div class="stat-val teal"  id="statRecs">0</div><div class="stat-label">Записів</div></div>
+    <div class="stat"><div class="stat-val gold"  id="statEarned">0 ₴</div><div class="stat-label">Зароблено</div></div>
+    <div class="stat"><div class="stat-val red"   id="statPaid">0 ₴</div><div class="stat-label">Виплачено</div></div>
+  </div>
+
+  <div class="balance-bar">
+    <span class="b-label">💰 До виплати:</span>
+    <span class="b-val positive" id="balanceVal">0 ₴</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="work"       onclick="switchTab(this,'work')">📋 Журнал</button>
+    <button class="tab-btn"        data-tab="payments"   onclick="switchTab(this,'payments')">💵 Виплати</button>
+    <button class="tab-btn"        data-tab="deductions" onclick="switchTab(this,'deductions')">➖ Відрахування</button>
+  </div>
+
+  <div class="tab-pane active" id="tab-work">
+    <div class="card">
+      <div class="card-title">// Додати запис</div>
+      <div class="form-row">
+        <div class="field"><label>Дата</label><input type="date" id="inputDate"></div>
+        <div class="field"><label>Початок</label><input type="time" id="inputStart"></div>
+        <div class="field"><label>Кінець</label><input type="time" id="inputEnd"></div>
+        <div class="field"><label>&nbsp;</label><button class="btn btn-add" onclick="addSession()">+ Додати</button></div>
+      </div>
+    </div>
+    <div class="section-label">Журнал роботи</div>
+    <div class="table-wrap" style="margin-bottom:16px">
+      <div class="table-head sessions-head">
+        <span class="th">Дата</span><span class="th">Початок</span><span class="th">Кінець</span>
+        <span class="th">Годин</span><span class="th">Зароблено</span><span class="th"></span>
+      </div>
+      <div class="table-body" id="sessionsBody"><div class="empty">Завантаження...</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-pay"   onclick="openPayModal()">💵 ОТРИМАТИ ГРОШІ</button>
+      <button class="btn btn-clear" onclick="clearAll()">✕ Очистити все</button>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-payments">
+    <div class="summary-cards">
+      <div class="sum-card"><div class="sum-val" style="color:var(--gold)"    id="payStatTotal">0 ₴</div><div class="sum-label">Всього виплачено</div></div>
+      <div class="sum-card"><div class="sum-val" style="color:var(--accent2)" id="payStatCount">0</div><div class="sum-label">Кількість виплат</div></div>
+      <div class="sum-card"><div class="sum-val" style="color:var(--accent)"  id="payStatBalance">0 ₴</div><div class="sum-label">Залишок до виплати</div></div>
+    </div>
+    <div class="section-label">Історія виплат</div>
+    <div class="table-wrap" style="margin-bottom:16px">
+      <div class="table-head payments-head">
+        <span class="th">Дата</span><span class="th">Час</span>
+        <span class="th">Коментар</span><span class="th">Сума</span><span class="th"></span>
+      </div>
+      <div class="table-body" id="paymentsBody"><div class="empty">Завантаження...</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-pay"   onclick="openPayModal()">💵 НОВА ВИПЛАТА</button>
+      <button class="btn btn-clear" onclick="clearPayments()">✕ Очистити виплати</button>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-deductions">
+    <div class="card">
+      <div class="card-title">// Додати відрахування</div>
+      <div class="form-row" style="grid-template-columns:140px 1fr 130px;">
+        <div class="field"><label>Дата</label><input type="date" id="dedDate"></div>
+        <div class="field"><label>Причина</label><input type="text" id="dedNote" placeholder="Штраф, аванс, борг..."></div>
+        <div class="field"><label>Сума (₴)</label><input type="number" id="dedAmount" placeholder="0" min="0" step="0.01"></div>
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-add" style="max-width:240px" onclick="addDeduction()">➖ Додати відрахування</button>
+      </div>
+    </div>
+    <div class="summary-cards">
+      <div class="sum-card"><div class="sum-val" style="color:var(--red)"     id="dedStatTotal">0 ₴</div><div class="sum-label">Всього відраховано</div></div>
+      <div class="sum-card"><div class="sum-val" style="color:var(--accent2)" id="dedStatCount">0</div><div class="sum-label">Кількість записів</div></div>
+      <div class="sum-card"><div class="sum-val" style="color:var(--accent)"  id="dedStatBalance">0 ₴</div><div class="sum-label">До виплати (з урах.)</div></div>
+    </div>
+    <div class="section-label">Журнал відрахувань</div>
+    <div class="table-wrap" style="margin-bottom:16px">
+      <div class="table-head" style="grid-template-columns:120px 1fr 110px 32px;">
+        <span class="th">Дата</span><span class="th">Причина</span><span class="th">Сума</span><span class="th"></span>
+      </div>
+      <div class="table-body" id="deductionsBody"><div class="empty">Завантаження...</div></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-clear" onclick="clearDeductions()">✕ Очистити відрахування</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal">
+    <button class="btn-close-modal" onclick="closePayModal()">✕</button>
+    <div class="modal-icon">💵</div>
+    <h2>ВИПЛАТА</h2>
+    <p class="modal-sub">Введіть суму, яку отримав працівник</p>
+    <div class="modal-amount">
+      <div class="amount-val" id="modalBalanceVal">0 ₴</div>
+      <div class="amount-label">залишок до виплати</div>
+    </div>
+    <div class="field"><label>Сума виплати (₴)</label><input type="number" id="payAmountInput" placeholder="Введіть суму..." min="0" step="0.01"></div>
+    <div class="field"><label>Коментар (необов'язково)</label><input type="text" id="payNoteInput" placeholder="Наприклад: зарплата за березень"></div>
+    <button class="btn-confirm" onclick="confirmPayment()">✓ ПІДТВЕРДИТИ ВИПЛАТУ</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore, collection, onSnapshot,
+  addDoc, deleteDoc, doc, getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBg2e7GxmWWxJ4GZzZ2lCAKEUDJ-vvIfCM",
+  authDomain: "robochiychas.firebaseapp.com",
+  projectId: "robochiychas",
+  storageBucket: "robochiychas.firebasestorage.app",
+  messagingSenderId: "404184412890",
+  appId: "1:404184412890:web:3dc4e7216457116fe66be3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+
+const RATE = 150;
+let sessions = [], payments = [], deductions = [];
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  dot.className = 'sync-dot ' + state;
+  label.textContent = state==='ok' ? 'Синхронізовано' : state==='loading' ? "З'єднання..." : 'Помилка!';
+}
+
+document.getElementById('inputDate').valueAsDate = new Date();
+document.getElementById('dedDate').valueAsDate   = new Date();
+
+onSnapshot(collection(db,'sessions'), snap => {
+  sessions = snap.docs.map(d=>({id:d.id,...d.data()}));
+  setSyncStatus('ok'); render();
+}, ()=>setSyncStatus('error'));
+
+onSnapshot(collection(db,'payments'), snap => {
+  payments = snap.docs.map(d=>({id:d.id,...d.data()})); render();
+});
+
+onSnapshot(collection(db,'deductions'), snap => {
+  deductions = snap.docs.map(d=>({id:d.id,...d.data()})); render();
+});
+
+function calcHours(start,end){
+  const [sh,sm]=start.split(':').map(Number);
+  const [eh,em]=end.split(':').map(Number);
+  let mins=(eh*60+em)-(sh*60+sm);
+  if(mins<0)mins+=1440;
+  return +(mins/60).toFixed(2);
+}
+function fmtDate(d){const [y,m,day]=d.split('-');return `${day}.${m}.${y}`;}
+function totalEarned(){return +sessions.reduce((a,s)=>a+s.earn,0).toFixed(2);}
+function totalPaid(){return +payments.reduce((a,p)=>a+p.amount,0).toFixed(2);}
+function totalDeducted(){return +deductions.reduce((a,d)=>a+d.amount,0).toFixed(2);}
+function getBalance(){return +(totalEarned()-totalPaid()-totalDeducted()).toFixed(2);}
+
+window.addSession = async function(){
+  const date=document.getElementById('inputDate').value;
+  const start=document.getElementById('inputStart').value;
+  const end=document.getElementById('inputEnd').value;
+  if(!date||!start||!end){showToast('⚠ Заповніть всі поля!');return;}
+  if(start===end){showToast('⚠ Час початку = кінець!');return;}
+  const hours=calcHours(start,end);
+  const earn=+(hours*RATE).toFixed(2);
+  setSyncStatus('loading');
+  await addDoc(collection(db,'sessions'),{date,start,end,hours,earn,ts:Date.now()});
+  showToast(`✓ ${hours}г → +${earn} ₴`);
+};
+
+window.deleteSession = async function(id){
+  if(!confirm('Видалити цей запис?'))return;
+  await deleteDoc(doc(db,'sessions',id));
+};
+
+window.addDeduction = async function(){
+  const date=document.getElementById('dedDate').value;
+  const note=document.getElementById('dedNote').value.trim();
+  const raw=document.getElementById('dedAmount').value;
+  const amount=parseFloat(raw);
+  if(!date){showToast('⚠ Вкажіть дату!');return;}
+  if(!raw||isNaN(amount)||amount<=0){showToast('⚠ Введіть правильну суму!');return;}
+  await addDoc(collection(db,'deductions'),{date,note:note||'Відрахування',amount:+amount.toFixed(2),ts:Date.now()});
+  document.getElementById('dedNote').value='';
+  document.getElementById('dedAmount').value='';
+  showToast(`➖ -${amount} ₴ відраховано`);
+};
+
+window.deleteDeduction = async function(id){
+  if(!confirm('Видалити це відрахування?'))return;
+  await deleteDoc(doc(db,'deductions',id));
+};
+
+window.deletePayment = async function(id){
+  if(!confirm('Видалити цю виплату?'))return;
+  await deleteDoc(doc(db,'payments',id));
+};
+
+window.openPayModal = function(){
+  const bal=getBalance();
+  document.getElementById('modalBalanceVal').textContent=bal+' ₴';
+  document.getElementById('payAmountInput').value=bal>0?bal:'';
+  document.getElementById('payNoteInput').value='';
+  document.getElementById('payModal').classList.add('show');
+  setTimeout(()=>document.getElementById('payAmountInput').focus(),250);
+};
+window.closePayModal = function(){document.getElementById('payModal').classList.remove('show');};
+
+window.confirmPayment = async function(){
+  const raw=document.getElementById('payAmountInput').value;
+  const amount=parseFloat(raw);
+  const note=document.getElementById('payNoteInput').value.trim();
+  if(!raw||isNaN(amount)||amount<=0){showToast('⚠ Введіть правильну суму!');return;}
+  const now=new Date();
+  const date=`${String(now.getDate()).padStart(2,'0')}.${String(now.getMonth()+1).padStart(2,'0')}.${now.getFullYear()}`;
+  const time=`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  await addDoc(collection(db,'payments'),{date,time,amount:+amount.toFixed(2),note,ts:Date.now()});
+  closePayModal();
+  showToast(`💵 Виплата ${amount} ₴ зафіксована!`);
+  switchTab(document.querySelector('[data-tab="payments"]'),'payments');
+};
+
+async function deleteCollection(name){
+  const snap=await getDocs(collection(db,name));
+  await Promise.all(snap.docs.map(d=>deleteDoc(doc(db,name,d.id))));
+}
+
+window.clearAll = async function(){
+  if(!confirm('Видалити ВСІ записи, виплати та відрахування?'))return;
+  await Promise.all([deleteCollection('sessions'),deleteCollection('payments'),deleteCollection('deductions')]);
+  showToast('Дані очищено');
+};
+window.clearPayments = async function(){
+  if(!confirm('Видалити всі виплати?'))return;
+  await deleteCollection('payments');
+  showToast('Виплати очищено');
+};
+window.clearDeductions = async function(){
+  if(!confirm('Видалити всі відрахування?'))return;
+  await deleteCollection('deductions');
+  showToast('Відрахування очищено');
+};
+
+function render(){
+  const earned=totalEarned(), paid=totalPaid(), balance=getBalance();
+  const hours=+sessions.reduce((a,s)=>a+s.hours,0).toFixed(2);
+  document.getElementById('statHours').textContent=hours;
+  document.getElementById('statRecs').textContent=sessions.length;
+  document.getElementById('statEarned').textContent=earned+' ₴';
+  document.getElementById('statPaid').textContent=paid+' ₴';
+  const balEl=document.getElementById('balanceVal');
+  balEl.textContent=balance+' ₴';
+  balEl.className='b-val '+(balance>0?'positive':'zero');
+
+  const sb=document.getElementById('sessionsBody');
+  sb.innerHTML=!sessions.length?'<div class="empty">Записів ще немає</div>':
+    [...sessions].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`
+      <div class="table-row session-row">
+        <span class="td muted">${fmtDate(s.date)}</span>
+        <span class="td">${s.start}</span><span class="td">${s.end}</span>
+        <span class="td teal">${s.hours} год</span>
+        <span class="td green">${s.earn} ₴</span>
+        <button class="del-btn" onclick="deleteSession('${s.id}')">✕</button>
+      </div>`).join('');
+
+  const pb=document.getElementById('paymentsBody');
+  pb.innerHTML=!payments.length?'<div class="empty">Виплат ще не було</div>':
+    [...payments].sort((a,b)=>b.ts-a.ts).map(p=>`
+      <div class="table-row payment-row">
+        <span class="td muted">${p.date}</span><span class="td muted">${p.time||'—'}</span>
+        <span class="td">${p.note||'<span style="color:var(--muted)">—</span>'}</span>
+        <span class="td gold">${p.amount} ₴ <span class="tag tag-gold">ВИПЛАТА</span></span>
+        <button class="del-btn" onclick="deletePayment('${p.id}')">✕</button>
+      </div>`).join('');
+  document.getElementById('payStatTotal').textContent=paid+' ₴';
+  document.getElementById('payStatCount').textContent=payments.length;
+  document.getElementById('payStatBalance').textContent=balance+' ₴';
+
+  const deducted=totalDeducted();
+  const db2=document.getElementById('deductionsBody');
+  db2.innerHTML=!deductions.length?'<div class="empty">Відрахувань ще немає</div>':
+    [...deductions].sort((a,b)=>b.ts-a.ts).map(d=>`
+      <div class="table-row" style="grid-template-columns:120px 1fr 110px 32px;">
+        <span class="td muted">${fmtDate(d.date)}</span>
+        <span class="td">${d.note}</span>
+        <span class="td" style="color:var(--red);font-weight:600;">-${d.amount} ₴</span>
+        <button class="del-btn" onclick="deleteDeduction('${d.id}')">✕</button>
+      </div>`).join('');
+  document.getElementById('dedStatTotal').textContent=deducted+' ₴';
+  document.getElementById('dedStatCount').textContent=deductions.length;
+  document.getElementById('dedStatBalance').textContent=balance+' ₴';
+}
+
+window.switchTab = function(btn,name){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+};
+
+let toastTimer;
+window.showToast = function(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+};
+
+document.getElementById('payModal').addEventListener('click',function(e){
+  if(e.target===this)closePayModal();
+});
+</script>
+</body>
+</html>
