@@ -33,7 +33,7 @@
   .balance-bar .b-label{font-size:12px;color:var(--muted);letter-spacing:1px;}
   .balance-bar .b-val{font-family:'Bebas Neue';font-size:26px;letter-spacing:2px;}
   .balance-bar .b-val.positive{color:var(--accent);} .balance-bar .b-val.zero{color:var(--muted);}
-  .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+  .tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
   .tab-btn{background:none;border:none;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;padding:10px 18px;cursor:pointer;transition:all .15s;border-bottom:2px solid transparent;margin-bottom:-1px;}
   .tab-btn:hover{color:var(--text);}
   .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
@@ -41,8 +41,9 @@
   .card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:24px;margin-bottom:16px;}
   .card-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;}
   label{display:block;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
-  input[type="date"],input[type="time"],input[type="number"],input[type="text"]{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:14px;padding:11px 14px;border-radius:3px;outline:none;transition:border-color .2s;color-scheme:dark;}
-  input:focus{border-color:var(--accent);}
+  input[type="date"],input[type="time"],input[type="number"],input[type="text"],select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:14px;padding:11px 14px;border-radius:3px;outline:none;transition:border-color .2s;color-scheme:dark;}
+  select option{background:var(--surface2);}
+  input:focus,select:focus{border-color:var(--accent);}
   .form-row{display:grid;grid-template-columns:140px 100px 100px 1fr;gap:12px;align-items:end;}
   @media(max-width:640px){.form-row{grid-template-columns:1fr 1fr;}}
   .field{margin-bottom:0;}
@@ -99,6 +100,46 @@
   .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--accent);color:#0d0f0e;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;letter-spacing:2px;padding:11px 22px;border-radius:3px;z-index:200;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;}
   .toast.show{transform:translateX(-50%) translateY(0);}
   .section-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+
+  /* ── ANALYTICS ── */
+  .analytics-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap;}
+  .analytics-header h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--text);}
+  .month-nav{display:flex;align-items:center;gap:8px;}
+  .month-nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:16px;width:34px;height:34px;border-radius:3px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;}
+  .month-nav-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .month-label{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--accent);min-width:200px;text-align:center;}
+  .ana-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+  @media(max-width:700px){.ana-stats{grid-template-columns:repeat(2,1fr);}}
+  .ana-stat{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:14px 12px;text-align:center;}
+  .ana-val{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;line-height:1;margin-bottom:4px;}
+  .ana-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+
+  .chart-card{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:20px;margin-bottom:16px;}
+  .chart-title{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .chart-wrap{position:relative;width:100%;overflow-x:auto;}
+  canvas{display:block;}
+
+  .months-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+  .months-row{display:grid;grid-template-columns:120px 70px 90px 90px 90px 90px;padding:11px 18px;border-bottom:1px solid rgba(42,46,44,.4);align-items:center;}
+  .months-row:last-child{border-bottom:none;}
+  .months-row:hover{background:var(--surface2);}
+  .months-head{background:var(--surface2);border-bottom:1px solid var(--border);}
+  .months-head span{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+  @media(max-width:600px){
+    .months-row{grid-template-columns:100px 60px 80px 80px;font-size:11px;}
+    .months-row span:nth-child(5),.months-row span:nth-child(6){display:none;}
+  }
+
+  /* sparkline bar */
+  .bar-chart{display:flex;align-items:flex-end;gap:4px;height:120px;padding-top:10px;}
+  .bar-col{display:flex;flex-direction:column;align-items:center;flex:1;min-width:18px;}
+  .bar-fill{width:100%;border-radius:2px 2px 0 0;background:var(--accent2);transition:height .4s cubic-bezier(.34,1.4,.64,1),background .2s;cursor:pointer;position:relative;}
+  .bar-fill:hover{background:var(--accent);}
+  .bar-fill .bar-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);font-size:10px;padding:4px 7px;border-radius:3px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;z-index:10;}
+  .bar-fill:hover .bar-tip{opacity:1;}
+  .bar-day{font-size:8px;color:var(--muted);margin-top:4px;letter-spacing:0;}
+
+  .week-badge{display:inline-block;width:100%;height:4px;border-radius:2px;margin-top:3px;}
 </style>
 </head>
 <body>
@@ -129,8 +170,10 @@
     <button class="tab-btn active" data-tab="work"       onclick="switchTab(this,'work')">📋 Журнал</button>
     <button class="tab-btn"        data-tab="payments"   onclick="switchTab(this,'payments')">💵 Виплати</button>
     <button class="tab-btn"        data-tab="deductions" onclick="switchTab(this,'deductions')">➖ Відрахування</button>
+    <button class="tab-btn"        data-tab="analytics"  onclick="switchTab(this,'analytics')">📊 Аналітика</button>
   </div>
 
+  <!-- ─── ЖУРНАЛ ─── -->
   <div class="tab-pane active" id="tab-work">
     <div class="card">
       <div class="card-title">// Додати запис</div>
@@ -155,6 +198,7 @@
     </div>
   </div>
 
+  <!-- ─── ВИПЛАТИ ─── -->
   <div class="tab-pane" id="tab-payments">
     <div class="summary-cards">
       <div class="sum-card"><div class="sum-val" style="color:var(--gold)"    id="payStatTotal">0 ₴</div><div class="sum-label">Всього виплачено</div></div>
@@ -175,6 +219,7 @@
     </div>
   </div>
 
+  <!-- ─── ВІДРАХУВАННЯ ─── -->
   <div class="tab-pane" id="tab-deductions">
     <div class="card">
       <div class="card-title">// Додати відрахування</div>
@@ -204,6 +249,57 @@
     </div>
   </div>
 
+  <!-- ─── АНАЛІТИКА ─── -->
+  <div class="tab-pane" id="tab-analytics">
+
+    <div class="analytics-header">
+      <h2>МІСЯЧНИЙ АНАЛІЗ</h2>
+      <div class="month-nav">
+        <button class="month-nav-btn" onclick="changeAnalyticsMonth(-1)">‹</button>
+        <div class="month-label" id="anaMonthLabel">—</div>
+        <button class="month-nav-btn" onclick="changeAnalyticsMonth(1)">›</button>
+      </div>
+    </div>
+
+    <!-- Плитки місяця -->
+    <div class="ana-stats">
+      <div class="ana-stat"><div class="ana-val" style="color:var(--accent)"  id="anaHours">0</div><div class="ana-label">Годин</div></div>
+      <div class="ana-stat"><div class="ana-val" style="color:var(--accent2)" id="anaDays">0</div><div class="ana-label">Робочих днів</div></div>
+      <div class="ana-stat"><div class="ana-val" style="color:var(--gold)"    id="anaEarned">0 ₴</div><div class="ana-label">Зароблено</div></div>
+      <div class="ana-stat"><div class="ana-val" style="color:var(--red)"     id="anaDed">0 ₴</div><div class="ana-label">Відрахування</div></div>
+      <div class="ana-stat"><div class="ana-val" style="color:var(--accent)"  id="anaAvgDay">0</div><div class="ana-label">Сер. год/день</div></div>
+    </div>
+
+    <!-- Графік по днях -->
+    <div class="chart-card">
+      <div class="chart-title">// Години по днях місяця</div>
+      <div class="chart-wrap">
+        <div class="bar-chart" id="dayBarChart"></div>
+      </div>
+    </div>
+
+    <!-- Топ днів + розбивка -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="chart-title">// Найпродуктивніші дні</div>
+        <div id="topDaysList"></div>
+      </div>
+      <div class="chart-card" style="margin-bottom:0">
+        <div class="chart-title">// Дні тижня</div>
+        <div id="weekdayChart"></div>
+      </div>
+    </div>
+
+    <!-- Зведення по місяцях -->
+    <div class="section-label">Всі місяці</div>
+    <div class="months-table-wrap">
+      <div class="months-row months-head">
+        <span>Місяць</span><span>Днів</span><span>Годин</span><span>Зароблено</span><span>Відрах.</span><span>Баланс</span>
+      </div>
+      <div id="monthsTableBody"><div class="empty">Завантаження...</div></div>
+    </div>
+
+  </div><!-- /analytics -->
 </div>
 
 <!-- Modal -->
@@ -244,9 +340,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-
 const RATE = 150;
 let sessions = [], payments = [], deductions = [];
+
+// Current analytics month (YYYY-MM)
+const now = new Date();
+let anaYear  = now.getFullYear();
+let anaMonth = now.getMonth(); // 0-based
+
+const UA_MONTHS = ['Січень','Лютий','Березень','Квітень','Травень','Червень',
+                   'Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+const UA_WEEKDAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
 
 function setSyncStatus(state) {
   const dot = document.getElementById('syncDot');
@@ -284,6 +388,203 @@ function totalPaid(){return +payments.reduce((a,p)=>a+p.amount,0).toFixed(2);}
 function totalDeducted(){return +deductions.reduce((a,d)=>a+d.amount,0).toFixed(2);}
 function getBalance(){return +(totalEarned()-totalPaid()-totalDeducted()).toFixed(2);}
 
+// ── ANALYTICS HELPERS ────────────────────────────────────────
+function monthKey(y,m){return `${y}-${String(m+1).padStart(2,'0')}`;}
+
+function sessionsInMonth(y,m){
+  const key = monthKey(y,m);
+  return sessions.filter(s=>s.date && s.date.startsWith(key));
+}
+function deductionsInMonth(y,m){
+  const key = monthKey(y,m);
+  return deductions.filter(d=>d.date && d.date.startsWith(key));
+}
+
+function allMonthKeys(){
+  const keys = new Set();
+  sessions.forEach(s=>{ if(s.date) keys.add(s.date.slice(0,7)); });
+  deductions.forEach(d=>{ if(d.date) keys.add(d.date.slice(0,7)); });
+  return [...keys].sort();
+}
+
+function renderAnalytics(){
+  const y = anaYear, m = anaMonth;
+  document.getElementById('anaMonthLabel').textContent = `${UA_MONTHS[m]} ${y}`;
+
+  const ms = sessionsInMonth(y,m);
+  const md = deductionsInMonth(y,m);
+
+  const hours   = +ms.reduce((a,s)=>a+s.hours,0).toFixed(2);
+  const days    = new Set(ms.map(s=>s.date)).size;
+  const earned  = +ms.reduce((a,s)=>a+s.earn,0).toFixed(2);
+  const deducted= +md.reduce((a,d)=>a+d.amount,0).toFixed(2);
+  const avgDay  = days ? +(hours/days).toFixed(1) : 0;
+
+  document.getElementById('anaHours').textContent  = hours;
+  document.getElementById('anaDays').textContent   = days;
+  document.getElementById('anaEarned').textContent = earned+' ₴';
+  document.getElementById('anaDed').textContent    = deducted+' ₴';
+  document.getElementById('anaAvgDay').textContent = avgDay;
+
+  // ── Bar chart: hours per day ──────────────────────────
+  const daysInMonth = new Date(y, m+1, 0).getDate();
+  const dayMap = {};
+  ms.forEach(s=>{ dayMap[s.date] = (dayMap[s.date]||0) + s.hours; });
+  const vals = Array.from({length:daysInMonth},(_,i)=>{
+    const key = `${y}-${String(m+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;
+    return dayMap[key]||0;
+  });
+  const maxVal = Math.max(...vals, 0.1);
+  const MAX_PX = 100;
+  const barEl = document.getElementById('dayBarChart');
+  barEl.innerHTML = vals.map((v,i)=>{
+    const px = v > 0 ? Math.max(4, Math.round((v/maxVal)*MAX_PX)) : 0;
+    const col = v>=8?'var(--accent)':v>=4?'var(--accent2)':v>0?'#3a4a3e':'transparent';
+    return `<div class="bar-col">
+      <div style="width:100%;height:${MAX_PX}px;display:flex;align-items:flex-end;">
+        <div style="width:100%;height:${px}px;background:${col};border-radius:2px 2px 0 0;position:relative;cursor:pointer;transition:background .2s;"
+             onmouseenter="this.querySelector('.tip').style.opacity=1"
+             onmouseleave="this.querySelector('.tip').style.opacity=0">
+          ${v>0?`<div class="tip" style="position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);font-size:10px;padding:3px 7px;border-radius:3px;white-space:nowrap;opacity:0;pointer-events:none;z-index:10;transition:opacity .15s;">${i+1} — ${v}г</div>`:''}
+        </div>
+      </div>
+      <div class="bar-day">${i+1}</div>
+    </div>`;
+  }).join('');
+
+  // ── Top days ──────────────────────────────────────────
+  const topEl = document.getElementById('topDaysList');
+  const topDays = Object.entries(dayMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  if(!topDays.length){
+    topEl.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:8px 0">Немає даних</div>';
+  } else {
+    const tMax = topDays[0][1];
+    topEl.innerHTML = topDays.map(([date,h])=>{
+      const pct = Math.round((h/tMax)*100);
+      const [dy,dm,dd] = date.split('-');
+      return `<div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+          <span style="color:var(--text)">${dd}.${dm}</span>
+          <span style="color:var(--accent2)">${h} год</span>
+        </div>
+        <div style="background:var(--surface2);border-radius:2px;height:4px;">
+          <div style="width:${pct}%;height:4px;background:var(--accent2);border-radius:2px;transition:width .4s"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Weekday distribution ──────────────────────────────
+  const wdMap = [0,0,0,0,0,0,0]; // Mon–Sun
+  ms.forEach(s=>{
+    const d = new Date(s.date);
+    const wd = (d.getDay()+6)%7; // 0=Mon
+    wdMap[wd] += s.hours;
+  });
+  const wMax = Math.max(...wdMap, 0.1);
+  const wdEl = document.getElementById('weekdayChart');
+  const WD_MAX_PX = 60;
+  wdEl.innerHTML = `<div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding-top:6px">
+    ${wdMap.map((h,i)=>{
+      const pct = Math.round((h/wMax)*100);
+      const col = i>=5?'var(--red)':'var(--accent2)';
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+        <div style="width:100%;border-radius:2px 2px 0 0;height:${Math.max(h?2:0,Math.round((h/wMax)*55))}px;background:${col};transition:height .4s" title="${UA_WEEKDAYS[i]}: ${h} год"></div>
+        <span style="font-size:9px;color:${i>=5?'var(--red)':'var(--muted)'}">${UA_WEEKDAYS[i]}</span>
+      </div>`;
+    }).join('')}
+  </div>
+  <div style="font-size:9px;color:var(--muted);margin-top:8px;letter-spacing:1px">${wdMap.map((h,i)=>`${UA_WEEKDAYS[i]}: ${h}г`).join(' · ')}</div>`;
+
+  // ── All months table ──────────────────────────────────
+  const allKeys = allMonthKeys();
+  const tbody = document.getElementById('monthsTableBody');
+  if(!allKeys.length){
+    tbody.innerHTML='<div class="empty">Немає даних</div>';
+  } else {
+    tbody.innerHTML = [...allKeys].reverse().map(key=>{
+      const [ky,km] = key.split('-').map(Number);
+      const kSess = sessions.filter(s=>s.date&&s.date.startsWith(key));
+      const kDed  = deductions.filter(d=>d.date&&d.date.startsWith(key));
+      const kHours   = +kSess.reduce((a,s)=>a+s.hours,0).toFixed(1);
+      const kDays    = new Set(kSess.map(s=>s.date)).size;
+      const kEarned  = +kSess.reduce((a,s)=>a+s.earn,0).toFixed(0);
+      const kDeducted= +kDed.reduce((a,d)=>a+d.amount,0).toFixed(0);
+      const kBal = kEarned - kDeducted;
+      const isCurrent = (ky===y && km-1===m);
+      return `<div class="months-row" style="${isCurrent?'background:rgba(200,245,96,.04);border-left:2px solid var(--accent)':''}">
+        <span style="font-size:11px;${isCurrent?'color:var(--accent)':''}">${UA_MONTHS[km-1]} ${ky}</span>
+        <span style="font-size:11px;color:var(--muted)">${kDays}</span>
+        <span style="font-size:12px;color:var(--accent2)">${kHours}г</span>
+        <span style="font-size:12px;color:var(--gold)">${kEarned} ₴</span>
+        <span style="font-size:12px;color:var(--red)">${kDeducted?'-'+kDeducted+' ₴':'—'}</span>
+        <span style="font-size:12px;color:var(--accent)">${kBal} ₴</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+window.changeAnalyticsMonth = function(dir){
+  anaMonth += dir;
+  if(anaMonth > 11){ anaMonth = 0; anaYear++; }
+  if(anaMonth < 0) { anaMonth = 11; anaYear--; }
+  renderAnalytics();
+};
+
+// ── MAIN RENDER ──────────────────────────────────────────────
+function render(){
+  const earned=totalEarned(), paid=totalPaid(), balance=getBalance();
+  const hours=+sessions.reduce((a,s)=>a+s.hours,0).toFixed(2);
+  document.getElementById('statHours').textContent=hours;
+  document.getElementById('statRecs').textContent=sessions.length;
+  document.getElementById('statEarned').textContent=earned+' ₴';
+  document.getElementById('statPaid').textContent=paid+' ₴';
+  const balEl=document.getElementById('balanceVal');
+  balEl.textContent=balance+' ₴';
+  balEl.className='b-val '+(balance>0?'positive':'zero');
+
+  const sb=document.getElementById('sessionsBody');
+  sb.innerHTML=!sessions.length?'<div class="empty">Записів ще немає</div>':
+    [...sessions].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`
+      <div class="table-row session-row">
+        <span class="td muted">${fmtDate(s.date)}</span>
+        <span class="td">${s.start}</span><span class="td">${s.end}</span>
+        <span class="td teal">${s.hours} год</span>
+        <span class="td green">${s.earn} ₴</span>
+        <button class="del-btn" onclick="deleteSession('${s.id}')">✕</button>
+      </div>`).join('');
+
+  const pb=document.getElementById('paymentsBody');
+  pb.innerHTML=!payments.length?'<div class="empty">Виплат ще не було</div>':
+    [...payments].sort((a,b)=>b.ts-a.ts).map(p=>`
+      <div class="table-row payment-row">
+        <span class="td muted">${p.date}</span><span class="td muted">${p.time||'—'}</span>
+        <span class="td">${p.note||'<span style="color:var(--muted)">—</span>'}</span>
+        <span class="td gold">${p.amount} ₴ <span class="tag tag-gold">ВИПЛАТА</span></span>
+        <button class="del-btn" onclick="deletePayment('${p.id}')">✕</button>
+      </div>`).join('');
+  document.getElementById('payStatTotal').textContent=paid+' ₴';
+  document.getElementById('payStatCount').textContent=payments.length;
+  document.getElementById('payStatBalance').textContent=balance+' ₴';
+
+  const deducted=totalDeducted();
+  const db2=document.getElementById('deductionsBody');
+  db2.innerHTML=!deductions.length?'<div class="empty">Відрахувань ще немає</div>':
+    [...deductions].sort((a,b)=>b.ts-a.ts).map(d=>`
+      <div class="table-row" style="grid-template-columns:120px 1fr 110px 32px;">
+        <span class="td muted">${fmtDate(d.date)}</span>
+        <span class="td">${d.note}</span>
+        <span class="td" style="color:var(--red);font-weight:600;">-${d.amount} ₴</span>
+        <button class="del-btn" onclick="deleteDeduction('${d.id}')">✕</button>
+      </div>`).join('');
+  document.getElementById('dedStatTotal').textContent=deducted+' ₴';
+  document.getElementById('dedStatCount').textContent=deductions.length;
+  document.getElementById('dedStatBalance').textContent=balance+' ₴';
+
+  renderAnalytics();
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────
 window.addSession = async function(){
   const date=document.getElementById('inputDate').value;
   const start=document.getElementById('inputStart').value;
@@ -370,61 +671,12 @@ window.clearDeductions = async function(){
   showToast('Відрахування очищено');
 };
 
-function render(){
-  const earned=totalEarned(), paid=totalPaid(), balance=getBalance();
-  const hours=+sessions.reduce((a,s)=>a+s.hours,0).toFixed(2);
-  document.getElementById('statHours').textContent=hours;
-  document.getElementById('statRecs').textContent=sessions.length;
-  document.getElementById('statEarned').textContent=earned+' ₴';
-  document.getElementById('statPaid').textContent=paid+' ₴';
-  const balEl=document.getElementById('balanceVal');
-  balEl.textContent=balance+' ₴';
-  balEl.className='b-val '+(balance>0?'positive':'zero');
-
-  const sb=document.getElementById('sessionsBody');
-  sb.innerHTML=!sessions.length?'<div class="empty">Записів ще немає</div>':
-    [...sessions].sort((a,b)=>b.date.localeCompare(a.date)).map(s=>`
-      <div class="table-row session-row">
-        <span class="td muted">${fmtDate(s.date)}</span>
-        <span class="td">${s.start}</span><span class="td">${s.end}</span>
-        <span class="td teal">${s.hours} год</span>
-        <span class="td green">${s.earn} ₴</span>
-        <button class="del-btn" onclick="deleteSession('${s.id}')">✕</button>
-      </div>`).join('');
-
-  const pb=document.getElementById('paymentsBody');
-  pb.innerHTML=!payments.length?'<div class="empty">Виплат ще не було</div>':
-    [...payments].sort((a,b)=>b.ts-a.ts).map(p=>`
-      <div class="table-row payment-row">
-        <span class="td muted">${p.date}</span><span class="td muted">${p.time||'—'}</span>
-        <span class="td">${p.note||'<span style="color:var(--muted)">—</span>'}</span>
-        <span class="td gold">${p.amount} ₴ <span class="tag tag-gold">ВИПЛАТА</span></span>
-        <button class="del-btn" onclick="deletePayment('${p.id}')">✕</button>
-      </div>`).join('');
-  document.getElementById('payStatTotal').textContent=paid+' ₴';
-  document.getElementById('payStatCount').textContent=payments.length;
-  document.getElementById('payStatBalance').textContent=balance+' ₴';
-
-  const deducted=totalDeducted();
-  const db2=document.getElementById('deductionsBody');
-  db2.innerHTML=!deductions.length?'<div class="empty">Відрахувань ще немає</div>':
-    [...deductions].sort((a,b)=>b.ts-a.ts).map(d=>`
-      <div class="table-row" style="grid-template-columns:120px 1fr 110px 32px;">
-        <span class="td muted">${fmtDate(d.date)}</span>
-        <span class="td">${d.note}</span>
-        <span class="td" style="color:var(--red);font-weight:600;">-${d.amount} ₴</span>
-        <button class="del-btn" onclick="deleteDeduction('${d.id}')">✕</button>
-      </div>`).join('');
-  document.getElementById('dedStatTotal').textContent=deducted+' ₴';
-  document.getElementById('dedStatCount').textContent=deductions.length;
-  document.getElementById('dedStatBalance').textContent=balance+' ₴';
-}
-
 window.switchTab = function(btn,name){
   document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
+  if(name==='analytics') renderAnalytics();
 };
 
 let toastTimer;
